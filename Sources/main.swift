@@ -117,9 +117,7 @@ func command(inputs: [String], options: [Option]) throws {
     }) {
         printCount(of: tweets)
     } else {
-        for tweet in tweets {
-            print(tweet)
-        }
+        print(tweets.map { "[\($0.length)]\n\n" + $0.description }.joined(separator: "\n\n---\n\n"))
     }
 }
 

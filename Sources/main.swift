@@ -105,7 +105,7 @@ func command(inputs: [String], options: [Option]) throws {
         throw CommandError.illegalEncoding(path: input)
     }
     
-    let tweets = try Tweet.tweets(with: string)
+    let tweets = try Tweet.tweets(from: string, hashTag: "#swtws")
 
     if options.contains(where: {
         switch $0 {

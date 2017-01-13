@@ -229,13 +229,13 @@ func command(inputs: [String], options: [Option]) throws {
     } else {
         let speaker = createSpeaker(with: options, baseDirectoryPath: baseDirectoryPath)
         if options.contains(.resolveCode) {
-            tweets = try sync(operation: speaker.resolveCodes)(tweets)
+            tweets = try _sync(operation: speaker.resolveCodes)(tweets)
         }
         if options.contains(.resolveGist) {
             tweets = try sync(operation: speaker.resolveGists)(tweets)
         }
         if options.contains(.resolveImage) {
-            tweets = try sync(operation: speaker.resolveImages)(tweets)
+            tweets = try _sync(operation: speaker.resolveImages)(tweets)
         }
         
         let displaysLengths = options.contains(.length)

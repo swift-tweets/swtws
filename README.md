@@ -38,6 +38,20 @@ swtws sample.tw
 swtws --count sample.tw
 ```
 
+実際に Twitter に投稿するには `--presentation` オプションを付けてコマンドを実行します。
+
+```bash
+swtws --presentation sample.tw
+```
+
+ただし、 Twitter や Gist に投稿するためにトークンを指定する必要があります。 Twitter については `--twitter` オプションを、 Gist (GitHub) については `--github` オプションを使います。これらのオプションを使ってトークンを指定する方法の詳細は [How to upload resources in advance](#how-to-upload-resources-in-advance) を御覧下さい。
+
+デフォルトでは 30 秒間隔でツイートされますが、 `--interval` オプションを使って間隔を変更することもできます。たとえば、 15 秒間隔にするには次のように指定します。
+
+```bash
+swtws --presentation --interval 15.0 sample.tw
+```
+
 ## How to update
 
 `swtws` コマンドをアップデートするには最新版を `git pull` してビルドするだけでなく、依存ライブラリも確実にアップデートするために、ビルド前に `swift build --clean` および `swift build --clean dist` を実行して下さい。
@@ -66,6 +80,8 @@ swift build
 
 - [TWITTERでOAUTH認証を行う(1：TWITTERへのアプリケーション登録)](http://techbooster.org/android/mashup/4525/)
 - [Tokens from dev.twitter.com](https://dev.twitter.com/oauth/overview/application-owner-access-tokens)
+
+
 
 ### GitHub
 

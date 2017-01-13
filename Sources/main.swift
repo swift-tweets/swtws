@@ -11,6 +11,7 @@ enum OptionName: String {
     case h = "-h"
     case help = "--help"
     case resolveImage = "--resolve-image"
+    case resolveGist = "--resolve-gist"
     case resolveCode = "--resolve-code"
     case presentation = "--presentation"
     case c = "-c"
@@ -20,11 +21,13 @@ enum OptionName: String {
     case twitter = "--twitter"
     case qiita = "--qiita"
     case github = "--github"
+    case imageOutput = "--image-output"
 }
 
 enum Option {
     case help
     case resolveImage
+    case resolveGist
     case resolveCode
     case presentation
     case count
@@ -33,6 +36,7 @@ enum Option {
     case twitter(credential: OAuthCredential)
     case qiita(token: String)
     case github(token: String)
+    case imageOutput(path: String)
 }
 
 extension Option: Equatable {
@@ -41,6 +45,8 @@ extension Option: Equatable {
         case (.help, .help):
             return true
         case (.resolveImage, .resolveImage):
+            return true
+        case (.resolveGist, .resolveGist):
             return true
         case (.resolveCode, .resolveCode):
             return true
@@ -58,6 +64,8 @@ extension Option: Equatable {
             return token1 == token2
         case let (.qiita(token1), .qiita(token2)):
             return token1 == token2
+        case let (.imageOutput(path1), .imageOutput(path2)):
+            return path1 == path2
         case (_, _):
             return false
         }
@@ -91,6 +99,8 @@ func parse<S: Sequence>(_ arguments: S) throws -> ([String], [Option]) where S.I
                 options.append(.help)
             case .resolveImage:
                 options.append(.resolveImage)
+            case .resolveGist:
+                options.append(.resolveGist)
             case .resolveCode:
                 options.append(.resolveCode)
             case .presentation:
@@ -138,6 +148,11 @@ func parse<S: Sequence>(_ arguments: S) throws -> ([String], [Option]) where S.I
                     throw ParseError.lackOfArgument(optionName)
                 }
                 options.append(.github(token: argument))
+            case .imageOutput:
+                guard let argument = iterator.next() else {
+                    throw ParseError.lackOfArgument(optionName)
+                }
+                options.append(.imageOutput(path: argument))
             }
         }
     }
@@ -216,6 +231,9 @@ func command(inputs: [String], options: [Option]) throws {
         if options.contains(.resolveCode) {
             tweets = try sync(operation: speaker.resolveCodes)(tweets)
         }
+        if options.contains(.resolveGist) {
+            tweets = try sync(operation: speaker.resolveGists)(tweets)
+        }
         if options.contains(.resolveImage) {
             tweets = try sync(operation: speaker.resolveImages)(tweets)
         }
@@ -239,6 +257,7 @@ func printHelp(_ print: (String) -> ()) {
     print("             [[-c | --count] [--length] <input>]")
     print("             [--resolve-image --twitter <oauth-credential> <input>]")
     print("                 <oauth-credential> = <consumer-key>,<consumer-secret>,<oauth-token>,<oauth-token-secret>")
+    print("             [--resolve-gist <output-directory> <input>]")
     print("             [--resolve-code --github <access-token> <input>]")
     print("             [--presentation --twitter <oauth-credential> [--interval <interval>] <input>]")
     print("")
@@ -249,6 +268,7 @@ func printHelp(_ print: (String) -> ()) {
     print("  --length               Display the lengths of tweets")
     print("  --presentation         Post tweets and print a Markdown which quotes the tweets")
     print("  --resolve-code         Upload codes to Gist and replace them with links and Gist IDs")
+    print("  --resolve-gist         Write codes on Gist as images and replace them with image paths")
     print("  --resolve-image        Upload images to Twitter and replace them with media IDs")
 }
 
@@ -262,15 +282,21 @@ func createSpeaker(with options: [Option], baseDirectoryPath: String) -> Speaker
             return nil
         }
         return credential
-        }.last
+    }.last
     let githubToken: String? = options.flatMap { option in
         guard case let .github(token) = option else {
             return nil
         }
         return token
-        }.last
+    }.last
+    let outputDirectoryPath: String? = options.flatMap { option in
+        guard case let .imageOutput(path) = option else {
+            return nil
+        }
+        return path
+    }.last
     
-    return Speaker(twitterCredential: twitterCredential, githubToken: githubToken, baseDirectoryPath: baseDirectoryPath)
+    return Speaker(twitterCredential: twitterCredential, githubToken: githubToken, baseDirectoryPath: baseDirectoryPath, outputDirectoryPath: outputDirectoryPath)
 }
 
 func htmlEscape(_ string: String) -> String {

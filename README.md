@@ -77,6 +77,12 @@ Personal Access Token が必要です。下記ページの手順で取得可能�
 
 プレゼンテーション本番での技術的な失敗を可能な限り減らすために、事前にリソースをアップロードしておくことをオススメします。
 
+    例：この tw 形式のツイートがどのように変化するか示します。
+    
+    ```swift:hello.swift
+    print("Hello")
+	```
+
 ### Post codes to Gist
 
 `--resolve-code` オプションを使って tw ファイルに記述されたコードを事前に Gist に投稿することができます。 Gist に投稿するには `--github` オプションで GitHub の [Personal Access Token](https://github.com/settings/tokens) を指定する必要があります。下記の例では `ffffffffffffffffffffffffffffffffffffffff` が Access Token に当たります。
@@ -86,6 +92,28 @@ tw ファイル中のコードをリンクと画像に置き換えた結果が�
 ```bash
 swtws path/to/tweets.tw --resolve-code --github ffffffffffffffffffffffffffffffffffffffff > path/to/output.tw
 ```
+
+    例：この tw 形式のツイートがどのように変化するか示します。
+    
+    https://gist.github.com/0000000000000000000000000000000000000000
+	
+	![](gist:0000000000000000000000000000000000000000)
+
+### Write codes on Gist as images
+
+`--resolve-gist` オプションを使って tw ファイルに記述された `![](gist:0000000000000000000000000000000000000000)` 形式の画像を生成し、ローカルファイルとして保存することができます。保存先ディレクトリを `--image-output` オプションで指定する必要があります。
+
+tw ファイル中の `![](gist:0000000000000000000000000000000000000000)` を `![](output/directory/path/image.png)` に置き換えた結果が標準出力に書き出されるので、 `> path/to/output.tw` のようにして結果を保存して下さい。
+
+```bash
+swtws path/to/tweets.tw --resolve-gist --image-output output/directory/path > path/to/output.tw
+```
+
+    例：この tw 形式のツイートがどのように変化するか示します。
+    
+    https://gist.github.com/0000000000000000000000000000000000000000
+	
+	![](output/directory/path/image.png)
 
 ### Upload images to Twitter
 
@@ -97,8 +125,8 @@ tw ファイル中のコードをリンクと画像に置き換えた結果が�
 swtws path/to/tweets.tw --resolve-image --twitter WWWWWWWWWWWWWWWWWWWW,XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX,YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY,ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ > path/to/output.tw
 ```
 
-## Dependencies
-
-依存関係は Swift Package Manager によって自動的に解決されます。
-
-- [TweetupKit](https://github.com/swift-tweets/tweetup-kit)
+    例：この tw 形式のツイートがどのように変化するか示します。
+    
+    https://gist.github.com/0000000000000000000000000000000000000000
+	
+	![](twitter:999999999999999999)

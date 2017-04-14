@@ -54,12 +54,11 @@ swtws --presentation --interval 15.0 sample.tw
 
 ## How to update
 
-`swtws` コマンドをアップデートするには最新版を `git pull` してビルドするだけでなく、依存ライブラリも確実にアップデートするために、ビルド前に `swift build --clean` および `swift build --clean dist` を実行して下さい。
+`swtws` コマンドをアップデートするには最新版を `git pull` してビルドするだけでなく、依存ライブラリもアップデートするために、ビルド前に `swift package update` を実行して下さい。
 
 ```bash
 git pull
-swift build --clean
-swift build --clean dist
+swift package update 
 swift build
 ```
 

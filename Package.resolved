@@ -1,0 +1,25 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "OAuthSwift",
+        "repositoryURL": "https://github.com/swift-tweets/OAuthSwift.git",
+        "state": {
+          "branch": null,
+          "revision": "2489c960e177e9413e52dabcedaa36e5f0705fd1",
+          "version": "2.0.0-beta"
+        }
+      },
+      {
+        "package": "TweetupKit",
+        "repositoryURL": "https://github.com/swift-tweets/tweetup-kit.git",
+        "state": {
+          "branch": null,
+          "revision": "0420a915c058628a29dba28137c49bb91cec72de",
+          "version": "0.1.0"
+        }
+      }
+    ]
+  },
+  "version": 1
+}

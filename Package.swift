@@ -1,8 +1,21 @@
+// swift-tools-version:4.0
+
 import PackageDescription
 
 let package = Package(
     name: "swtws",
+    products: [
+        .executable(name: "swtws", targets: ["swtws"]),
+    ],
     dependencies: [
-        .Package(url: "https://github.com/swift-tweets/tweetup-kit.git", majorVersion: 0)
+        .package(url: "https://github.com/swift-tweets/tweetup-kit.git", from: "0.0.0")
+    ],
+    targets: [
+        .target(
+            name: "swtws",
+            dependencies: [
+                "TweetupKit",
+            ]
+        )
     ]
 )

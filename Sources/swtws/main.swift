@@ -1,9 +1,24 @@
 import Foundation
 import TweetupKit
+import PromiseK
 
 extension Array {
     var tail: ArraySlice<Element> {
         return self[1..<endIndex]
+    }
+}
+
+extension Promise {
+    func sync() -> Value {
+        var resultValue: Value!
+        var waiting = true
+        get { value in
+            resultValue = value
+            waiting = false
+        }
+        let runLoop = RunLoop.current
+        while waiting && runLoop.run(mode: .defaultRunLoopMode, before: .distantFuture) { }
+        return resultValue
     }
 }
 
@@ -203,39 +218,24 @@ func command(inputs: [String], options: [Option]) throws {
         }.last
         
         let speaker = createSpeaker(with: options, baseDirectoryPath: baseDirectoryPath)
-        let postTweets: ([Tweet], @escaping (() throws -> [(String, String)]) -> ()) -> () = { value, completion in
-            speaker.post(tweets: tweets, with: interval ?? 30.0) { getIds in
-                do {
-                    let ids = try getIds()
-                    completion {
-                        ids
-                    }
-                } catch let error {
-                    completion {
-                        throw error
-                    }
-                }
-            }
-        }
-        let ids = try sync(operation: postTweets)(tweets)
-        assert(tweets.count == ids.count)
-        let tweetQuotations: [String] = zip(tweets, ids).map {
-            let (tweet, idAndScreenName) = $0
-            let (id, screenName) = idAndScreenName
+        let responses = try speaker.post(tweets: tweets, interval: interval ?? 30.0).sync()()
+        assert(tweets.count == responses.count)
+        let tweetQuotations: [String] = zip(tweets, responses).map {
+            let (tweet, response) = $0
             let escapedStatus = htmlEscape(tweet.body)
-            return "<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">\(escapedStatus)</p>&mdash; @\(screenName) <a href=\"https://twitter.com/\(screenName)/status/\(id)\"></a></blockquote>"
+            return "<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">\(escapedStatus)</p>&mdash; @\(response.screenName) <a href=\"https://twitter.com/\(response.screenName)/status/\(response.statusId)\"></a></blockquote>"
         }
         print(tweetQuotations.joined(separator: "\n\n"))
     } else {
         let speaker = createSpeaker(with: options, baseDirectoryPath: baseDirectoryPath)
         if options.contains(.resolveCode) {
-            tweets = try sync(operation: speaker.resolveCodes)(tweets)
+            tweets = try speaker.resolveCodes(of: tweets).sync()()
         }
         if options.contains(.resolveGist) {
-            tweets = try sync(operation: speaker.resolveGists)(tweets)
+            tweets = try speaker.resolveGists(of: tweets).sync()()
         }
         if options.contains(.resolveImage) {
-            tweets = try sync(operation: speaker.resolveImages)(tweets)
+            tweets = try speaker.resolveImages(of: tweets).sync()()
         }
         
         let displaysLengths = options.contains(.length)

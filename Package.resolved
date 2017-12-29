@@ -11,12 +11,21 @@
         }
       },
       {
+        "package": "PromiseK",
+        "repositoryURL": "https://github.com/koher/PromiseK.git",
+        "state": {
+          "branch": null,
+          "revision": "8c339c6a27b5b834dec65a66e790d736c3739c9a",
+          "version": "3.0.0-alpha.4"
+        }
+      },
+      {
         "package": "TweetupKit",
         "repositoryURL": "https://github.com/swift-tweets/tweetup-kit.git",
         "state": {
           "branch": null,
-          "revision": "0420a915c058628a29dba28137c49bb91cec72de",
-          "version": "0.1.0"
+          "revision": "6e61685e8dd79f8a5b582a19362f167f93600ad2",
+          "version": "0.2.0"
         }
       }
     ]

@@ -1,12 +1,7 @@
 import Foundation
+import Commander
 import TweetupKit
 import PromiseK
-
-extension Array {
-    var tail: ArraySlice<Element> {
-        return self[1..<endIndex]
-    }
-}
 
 extension Promise {
     func sync() -> Value {
@@ -22,303 +17,234 @@ extension Promise {
     }
 }
 
-enum OptionName: String {
-    case h = "-h"
-    case help = "--help"
-    case resolveImage = "--resolve-image"
-    case resolveGist = "--resolve-gist"
-    case resolveCode = "--resolve-code"
-    case presentation = "--presentation"
-    case c = "-c"
-    case count = "--count"
-    case length = "--length"
-    case interval = "--interval"
-    case twitter = "--twitter"
-    case qiita = "--qiita"
-    case github = "--github"
-    case imageOutput = "--image-output"
+extension APIError : CustomStringConvertible {
+    public var description: String {
+        return "[APIError] response = \(response), json = \(json)"
+    }
 }
 
-enum Option {
-    case help
-    case resolveImage
-    case resolveGist
-    case resolveCode
-    case presentation
-    case count
-    case length
-    case interval(TimeInterval)
-    case twitter(credential: OAuthCredential)
-    case qiita(token: String)
-    case github(token: String)
-    case imageOutput(path: String)
-}
-
-extension Option: Equatable {
-    static func ==(lhs: Option, rhs: Option) -> Bool {
-        switch (lhs, rhs) {
-        case (.help, .help):
-            return true
-        case (.resolveImage, .resolveImage):
-            return true
-        case (.resolveGist, .resolveGist):
-            return true
-        case (.resolveCode, .resolveCode):
-            return true
-        case (.presentation, .presentation):
-            return true
-        case (.count, .count):
-            return true
-        case (.length, .length):
-            return true
-        case let (.interval(interval1), .interval(interval2)):
-            return interval1 == interval2
-        case let (.twitter(credential1), .twitter(credential2)):
-            return credential1 == credential2
-        case let (.github(token1), .github(token2)):
-            return token1 == token2
-        case let (.qiita(token1), .qiita(token2)):
-            return token1 == token2
-        case let (.imageOutput(path1), .imageOutput(path2)):
-            return path1 == path2
-        case (_, _):
-            return false
+extension CodeRendererError : CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .illegalResponse:
+            return "[CodeRendererError] Illegal response during code rendering."
+        case .writingFailed:
+            return "[CodeRendererError] Failed to write images of code."
         }
     }
 }
 
-enum ParseError: Error {
-    case lackOfArgument(OptionName)
-    case illegalOption(String)
-    case illegalArgumentFormat(OptionName, String)
-}
-
-func parse<S: Sequence>(_ arguments: S) throws -> ([String], [Option]) where S.Iterator.Element == String {
-    var inputs = [String]()
-    var options = [Option]()
-    
-    var iterator = arguments.makeIterator()
-    while true {
-        guard let argument = iterator.next() else {
-            break
-        }
-        switch OptionName(rawValue: argument) {
-        case .none:
-            if argument.hasPrefix("-") {
-                throw ParseError.illegalOption(argument)
-            }
-            inputs.append(argument)
-        case let .some(optionName):
-            switch optionName {
-            case .h, .help:
-                options.append(.help)
-            case .resolveImage:
-                options.append(.resolveImage)
-            case .resolveGist:
-                options.append(.resolveGist)
-            case .resolveCode:
-                options.append(.resolveCode)
-            case .presentation:
-                options.append(.presentation)
-            case .c, .count:
-                options.append(.count)
-            case .length:
-                options.append(.length)
-            case .interval:
-                guard let argument = iterator.next() else {
-                    throw ParseError.lackOfArgument(optionName)
-                }
-                guard let interval = TimeInterval(argument) else {
-                    throw ParseError.illegalArgumentFormat(optionName, argument)
-                }
-                
-                options.append(.interval(interval))
-            case .twitter:
-                guard let argument = iterator.next() else {
-                    throw ParseError.lackOfArgument(optionName)
-                }
-                let arguments = argument.components(separatedBy: ",")
-                guard arguments.count == 4 else {
-                    throw ParseError.illegalArgumentFormat(optionName, argument)
-                }
-
-                let consumerKey = arguments[0]
-                let consumerSecret = arguments[1]
-                let oauthToken = arguments[2]
-                let oauthTokenSecret = arguments[3]
-                    
-                options.append(.twitter(credential: OAuthCredential(
-                    consumerKey: consumerKey,
-                    consumerSecret: consumerSecret,
-                    oauthToken: oauthToken,
-                    oauthTokenSecret: oauthTokenSecret
-                )))
-            case .qiita:
-                guard let argument = iterator.next() else {
-                    throw ParseError.lackOfArgument(optionName)
-                }
-                options.append(.qiita(token: argument))
-            case .github:
-                guard let argument = iterator.next() else {
-                    throw ParseError.lackOfArgument(optionName)
-                }
-                options.append(.github(token: argument))
-            case .imageOutput:
-                guard let argument = iterator.next() else {
-                    throw ParseError.lackOfArgument(optionName)
-                }
-                options.append(.imageOutput(path: argument))
-            }
+extension TweetParseError : CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .codeWithoutFileName(let code):
+            return "[TweetParseError] TweetParseError: Code without filename: \(code)"
+        case .illegalHashTag(let hashtag):
+            return "[TweetParseError] Illegal hashtag: \(hashtag)"
+        case .multipleAttachments(let tweet, let attachments):
+            return "[TweetParseError] Multiple attachments in a tweet: tweet = \(tweet), attachments = \(attachments)"
+        case .nonTailAttachment(let tweet, let attachment):
+            return "[TweetParseError] Attachment must be put at the end of a tweet: tweet = \(tweet), attachment = \(attachment)"
         }
     }
-    
-    return (inputs, options)
 }
 
-enum CommandError: Error {
+extension SpeakerError : CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .noGithubToken:
+            return "[SpeakerError] Lack of GitHub token."
+        case .noOutputDirectoryPath:
+            return "[SpeakerError] Lack of image output directory path."
+        case .noTwitterCredential:
+            return "[SpeakerError] Lack of Twitter credential."
+        }
+    }
+}
+
+extension TweetInitializationError : CustomStringConvertible {
+    public var description: String {
+        switch self {
+        case .empty:
+            return "[TweetInitializationError] Empty tweet."
+        case .tooLong(let tweet, let attachment, let length):
+            return "[TweetInitializationError] Too long tweet: tweet = \(tweet), attachment = \(String(describing: attachment)), length = \(length)"
+        }
+    }
+}
+
+enum CommandError : Error {
     case noInput
     case multipleInputs([String])
     case noSuchFile(path: String)
     case illegalEncoding(path: String)
     case lackOfGithubToken
+    case illegalTwitterCredentialFormat(String)
 }
 
-func command(inputs: [String], options: [Option]) throws {
-    if let option = options.first {
-        switch option {
-        case .help:
-            printHelp { print($0) }
-            return
-        default:
-            break
-        }
-    }
-    
-    guard inputs.count <= 1 else { throw CommandError.multipleInputs(inputs) }
-    guard let input = inputs.first else { throw CommandError.noInput }
-    
-    guard let data = FileManager.default.contents(atPath: input) else {
-        throw CommandError.noSuchFile(path: input)
+func decodedTweets(from file: String) throws -> [Tweet] {
+    guard let data = FileManager.default.contents(atPath: file) else {
+        throw CommandError.noSuchFile(path: file)
     }
     guard let string = String(data: data, encoding: .utf8) else {
-        throw CommandError.illegalEncoding(path: input)
+        throw CommandError.illegalEncoding(path: file)
     }
-    
-    let baseDirectoryPath = (input as NSString).deletingLastPathComponent
-    var tweets = try Tweet.tweets(from: string, hashTag: "#swtws")
-    
-    if options.contains(.count) {
-        printCount(of: tweets)
-    } else if options.contains(.presentation) {
-        let interval: TimeInterval? = options.flatMap { option in
-            guard case let .interval(interval) = option else {
-                return nil
-            }
-            return interval
-        }.last
-        
-        let speaker = createSpeaker(with: options, baseDirectoryPath: baseDirectoryPath)
-        let responses = try speaker.post(tweets: tweets, interval: interval ?? 30.0).sync()()
-        assert(tweets.count == responses.count)
-        let tweetQuotations: [String] = zip(tweets, responses).map {
-            let (tweet, response) = $0
-            let escapedStatus = htmlEscape(tweet.body)
-            return "<blockquote class=\"twitter-tweet\"><p dir=\"ltr\">\(escapedStatus)</p>&mdash; @\(response.screenName) <a href=\"https://twitter.com/\(response.screenName)/status/\(response.statusId)\"></a></blockquote>"
-        }
-        print(tweetQuotations.joined(separator: "\n\n"))
-    } else {
-        let speaker = createSpeaker(with: options, baseDirectoryPath: baseDirectoryPath)
-        if options.contains(.resolveCode) {
-            tweets = try speaker.resolveCodes(of: tweets).sync()()
-        }
-        if options.contains(.resolveGist) {
-            tweets = try speaker.resolveGists(of: tweets).sync()()
-        }
-        if options.contains(.resolveImage) {
-            tweets = try speaker.resolveImages(of: tweets).sync()()
-        }
-        
-        let displaysLengths = options.contains(.length)
-        
-        print(tweets.map {
-            if displaysLengths {
-                return "[\($0.length)]\n\n" + $0.description
-            } else {
-                return $0.description
-            }
-        }.joined(separator: "\n\n---\n\n"))
-    }
+    return try Tweet.tweets(from: string, hashTag: "#swtws")
 }
 
-func printHelp(_ print: (String) -> ()) {
-    print("OVERVIEW: Command line tool for Swift Tweets")
-    print("")
-    print("USAGE: swtws [-h | --help]")
-    print("             [[-c | --count] [--length] <input>]")
-    print("             [--resolve-image --twitter <oauth-credential> <input>]")
-    print("                 <oauth-credential> = <consumer-key>,<consumer-secret>,<oauth-token>,<oauth-token-secret>")
-    print("             [--resolve-gist --image-output <output-directory> <input>]")
-    print("             [--resolve-code --github <access-token> <input>]")
-    print("             [--presentation --twitter <oauth-credential> [--interval <interval>] <input>]")
-    print("")
-    print("OPTIONS:")
-    print("  -c, --count            Display counts of tweets")
-    print("  -h, --help             Display this document")
-    print("  --image-output         Degignate the directory to which generated images are written")
-    print("  --interval             Interval of posting tweets in seconds (the default value is 30.0)")
-    print("  --length               Display the lengths of tweets")
-    print("  --presentation         Post tweets and print a Markdown which quotes the tweets")
-    print("  --resolve-code         Upload codes to Gist and replace them with links and Gist IDs")
-    print("  --resolve-gist         Write codes on Gist as images and replace them with image paths")
-    print("  --resolve-image        Upload images to Twitter and replace them with media IDs")
+func parsedTwitterCredential(from twitterCredentialString: String) throws -> OAuthCredential {
+    let arguments = twitterCredentialString.components(separatedBy: ",")
+    guard arguments.count == 4 else {
+        throw CommandError.illegalTwitterCredentialFormat(twitterCredentialString)
+    }
+    
+    let consumerKey = arguments[0]
+    let consumerSecret = arguments[1]
+    let oauthToken = arguments[2]
+    let oauthTokenSecret = arguments[3]
+    
+    return OAuthCredential(
+        consumerKey: consumerKey,
+        consumerSecret: consumerSecret,
+        oauthToken: oauthToken,
+        oauthTokenSecret: oauthTokenSecret
+    )
+}
+
+func printTweets(_ tweets: [Tweet], displaysLengths: Bool = false) {
+    print(tweets.map {
+        if displaysLengths {
+            return "[\($0.length)]\n\n" + $0.description
+        } else {
+            return $0.description
+        }
+    }.joined(separator: "\n\n---\n\n"))
 }
 
 func printCount(of tweets: [Tweet]) {
     print(tweets.count)
 }
 
-func createSpeaker(with options: [Option], baseDirectoryPath: String) -> Speaker {
-    let twitterCredential: OAuthCredential? = options.flatMap { option in
-        guard case let .twitter(credential) = option else {
-            return nil
-        }
-        return credential
-    }.last
-    let githubToken: String? = options.flatMap { option in
-        guard case let .github(token) = option else {
-            return nil
-        }
-        return token
-    }.last
-    let outputDirectoryPath: String? = options.flatMap { option in
-        guard case let .imageOutput(path) = option else {
-            return nil
-        }
-        return path
-    }.last
-    
-    return Speaker(twitterCredential: twitterCredential, githubToken: githubToken, baseDirectoryPath: baseDirectoryPath, outputDirectoryPath: outputDirectoryPath)
-}
+let main = Group {
+    $0.addCommand("resolve-code", """
+        Post code in the given tweets to Gist, and output tweets in which the code are replated with links to the gists and their IDs.
 
-func htmlEscape(_ string: String) -> String {
-    return string.replacingOccurrences(of: "&", with: "&amp;")
-        .replacingOccurrences(of: "<", with: "&lt;")
-        .replacingOccurrences(of: ">", with: "&gt;")
-        .replacingOccurrences(of: "\"", with: "&quot;")
-        .replacingOccurrences(of: "'", with: "&#039;")
-}
+                swtws resolve-code [--github token] <tweets-file-path>
 
-func main(_ arguments: [String]) {
-    do {
-        let (inputs, options) = try parse(arguments.tail)
-        try command(inputs: inputs, options: options)
-    } catch let error {
-        fputs("ERROR: \(error)\n", stderr)
-        fputs("\n", stderr)
-        fputs("================================================================\n", stderr)
-        fputs("\n", stderr)
-        printHelp { fputs("\($0)\n", stderr) }
-    }
-}
+                    --github  Access token to post code to Gist.
 
-main(CommandLine.arguments)
+        """, command(
+            Option("github", default: ""),
+            Argument<String>("tweets-file-path")
+        ) { (githubToken: String, tweetsFilePath: String) in
+            let baseDirectoryPath = (tweetsFilePath as NSString).deletingLastPathComponent
+            let speaker = Speaker(
+                twitterCredential: nil,
+                githubToken: githubToken.isEmpty ? nil : githubToken,
+                baseDirectoryPath: baseDirectoryPath,
+                outputDirectoryPath: nil
+            )
+            let tweets = try decodedTweets(from: tweetsFilePath)
+            let outputTweets = try speaker.resolveCodes(of: tweets).sync()()
+            printTweets(outputTweets)
+        })
+    $0.addCommand("resolve-gist", """
+        Capture images of code represented as Gist IDs in given tweets, write them into the specified directory, and output tweets in which the Gist IDs are replaced with image paths.
+
+                swtws resolve-gist [--image-output path] <tweets-file-path>
+
+                    --image-output  Directory path in which images of code are written.
+
+        """, command(
+            Option("image-output", default: ""),
+            Argument<String>("tweets-file-path")
+        ) { (imagesOutputDirectoryPath: String, tweetsFilePath: String) in
+            let baseDirectoryPath = (tweetsFilePath as NSString).deletingLastPathComponent
+            let speaker = Speaker(
+                twitterCredential: nil,
+                githubToken: nil,
+                baseDirectoryPath: baseDirectoryPath,
+                outputDirectoryPath: imagesOutputDirectoryPath.isEmpty ? nil : imagesOutputDirectoryPath
+            )
+            let tweets = try decodedTweets(from: tweetsFilePath)
+            let outputTweets = try speaker.resolveGists(of: tweets).sync()()
+            printTweets(outputTweets)
+        })
+    $0.addCommand("resolve-image", """
+        Upload images in the given tweets to Twitter, and output tweets in which the images are replaced with media IDs.
+
+                swtws resolve-image [--twitter credential] <tweets-file-path>
+
+                    --twitter  Credentials to post tweets to Twitter, whose format is <consumer-key>,<consumer-secret>,<oauth-token>,<oauth-token-secret>.
+
+        """, command(
+            Option("twitter", default: ""),
+            Argument<String>("tweets-file-path")
+        ) { (twitterCredentialString: String, tweetsFilePath: String) in
+            let baseDirectoryPath = (tweetsFilePath as NSString).deletingLastPathComponent
+            let twitterCredential = twitterCredentialString.isEmpty ? nil : try parsedTwitterCredential(from: twitterCredentialString)
+            let speaker = Speaker(twitterCredential: twitterCredential, githubToken: nil, baseDirectoryPath: baseDirectoryPath, outputDirectoryPath: nil)
+            let tweets = try decodedTweets(from: tweetsFilePath)
+            let outputTweets = try speaker.resolveImages(of: tweets).sync()()
+            printTweets(outputTweets)
+        })
+    $0.addCommand("presentation", """
+        Make a presentation by posting the given tweets.
+
+                swtws presentation [--interval interval] [--github token] [--image-output path] [--twitter credential] <tweets-file-path>
+
+                    --interval      Intarvals of tweets in seconds.
+                    --github        Access token to post code to Gist.
+                    --image-output  Directory path in which images of code are written. This path is relative from the tweets files.
+                    --twitter       Credentials to post tweets to Twitter, whose format is <consumer-key>,<consumer-secret>,<oauth-token>,<oauth-token-secret>.
+
+        """, command(
+            Option("interval", default: 30.0),
+            Option("github", default: ""),
+            Option("image-output", default: ""),
+            Option("twitter", default: ""),
+            Argument<String>("tweets-file-path")
+        ) { interval, githubToken, imagesOutputDirectoryPath, twitterCredentialString, tweetsFilePath in
+            let baseDirectoryPath = (tweetsFilePath as NSString).deletingLastPathComponent
+            let twitterCredential = twitterCredentialString.isEmpty ? nil : try parsedTwitterCredential(from: twitterCredentialString)
+            let speaker = Speaker(
+                twitterCredential: twitterCredential,
+                githubToken: githubToken.isEmpty ? nil : githubToken,
+                baseDirectoryPath: baseDirectoryPath,
+                outputDirectoryPath: imagesOutputDirectoryPath.isEmpty ? nil : imagesOutputDirectoryPath
+            )
+            let tweets = try decodedTweets(from: tweetsFilePath)
+            let responses = try speaker.post(tweets: tweets, interval: interval).sync()()
+            assert(tweets.count == responses.count)
+            let tweetQuotations: [String] = zip(tweets, responses).map { tweet, response in
+                """
+                @\(response.screenName) \(response.statusId)
+                \(tweet.description)
+                """
+            }
+            print(tweetQuotations.joined(separator: "\n\n"))
+        })
+    $0.addCommand("check", """
+        Check the format of the given tweets by parsing them, and display the tweets with inserted hashtags.
+
+                swtws [-c|--count] [--length] <tweets-file-path>
+
+                    -c, --count  Display the count of the given tweets.
+                    --length     Display the length of the given tweets additionally.
+
+        """, command(
+            Flag("count", flag: "c"),
+            Flag("length"),
+            Argument<String>("tweets-file-path")
+        ) { countFlag, lengthFlag, tweetsFilePath in
+            let tweets = try decodedTweets(from: tweetsFilePath)
+            
+            if countFlag {
+                printCount(of: tweets)
+                return
+            }
+            
+            printTweets(tweets, displaysLengths: lengthFlag)
+        })
+}
+main.run()

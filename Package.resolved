@@ -42,8 +42,8 @@
         "repositoryURL": "https://github.com/swift-tweets/tweetup-kit.git",
         "state": {
           "branch": null,
-          "revision": "6e61685e8dd79f8a5b582a19362f167f93600ad2",
-          "version": "0.2.0"
+          "revision": "71f011742c32841bf6b4d67fbc519940bd5446de",
+          "version": "0.2.1"
         }
       }
     ]

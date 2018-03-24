@@ -82,6 +82,25 @@ enum CommandError : Error {
     case illegalTwitterCredentialFormat(String)
 }
 
+extension CommandError : CustomStringConvertible {
+    var description: String {
+        switch self {
+        case .noInput:
+            return "[\(type(of: self))] No input."
+        case .multipleInputs(let inputs):
+            return "[\(type(of: self))] Multiple inputs: \(inputs)"
+        case .noSuchFile(path: let path):
+            return "[\(type(of: self))] No such file: \(path)"
+        case .illegalEncoding(path: let path):
+            return "[\(type(of: self))] Illegal encoding (must be UTF-8): \(path)"
+        case .lackOfGithubToken:
+            return "[\(type(of: self))] Lack of a Github token."
+        case .illegalTwitterCredentialFormat(let credential):
+            return "[\(type(of: self))] Illegal Twitter credential format (must be formatted like <consumer-key>,<consumer-secret>,<oauth-token>,<oauth-token-secret>): \(credential)"
+        }
+    }
+}
+
 func decodedTweets(from file: String) throws -> [Tweet] {
     guard let data = FileManager.default.contents(atPath: file) else {
         throw CommandError.noSuchFile(path: file)

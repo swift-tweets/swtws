@@ -19,7 +19,7 @@ extension Promise {
 
 extension APIError : CustomStringConvertible {
     public var description: String {
-        return "[APIError] response = \(response), json = \(json)"
+        return "[\(type(of: self))] response = \(response), json = \(json)"
     }
 }
 
@@ -27,9 +27,9 @@ extension CodeRendererError : CustomStringConvertible {
     public var description: String {
         switch self {
         case .illegalResponse:
-            return "[CodeRendererError] Illegal response during code rendering."
+            return "[\(type(of: self))] Illegal response during code rendering."
         case .writingFailed:
-            return "[CodeRendererError] Failed to write images of code."
+            return "[\(type(of: self))] Failed to write images of code."
         }
     }
 }
@@ -38,13 +38,13 @@ extension TweetParseError : CustomStringConvertible {
     public var description: String {
         switch self {
         case .codeWithoutFileName(let code):
-            return "[TweetParseError] TweetParseError: Code without filename: \(code)"
+            return "[\(type(of: self))] Code without filename: \(code)"
         case .illegalHashTag(let hashtag):
-            return "[TweetParseError] Illegal hashtag: \(hashtag)"
+            return "[\(type(of: self))] Illegal hashtag: \(hashtag)"
         case .multipleAttachments(let tweet, let attachments):
-            return "[TweetParseError] Multiple attachments in a tweet: tweet = \(tweet), attachments = \(attachments)"
+            return "[\(type(of: self))] Multiple attachments in a tweet: tweet = \(tweet), attachments = \(attachments)"
         case .nonTailAttachment(let tweet, let attachment):
-            return "[TweetParseError] Attachment must be put at the end of a tweet: tweet = \(tweet), attachment = \(attachment)"
+            return "[\(type(of: self))] Attachment must be put at the end of a tweet: tweet = \(tweet), attachment = \(attachment)"
         }
     }
 }
@@ -53,11 +53,11 @@ extension SpeakerError : CustomStringConvertible {
     public var description: String {
         switch self {
         case .noGithubToken:
-            return "[SpeakerError] Lack of GitHub token."
+            return "[\(type(of: self))] Lack of GitHub token."
         case .noOutputDirectoryPath:
-            return "[SpeakerError] Lack of image output directory path."
+            return "[\(type(of: self))] Lack of image output directory path."
         case .noTwitterCredential:
-            return "[SpeakerError] Lack of Twitter credential."
+            return "[\(type(of: self))] Lack of Twitter credential."
         }
     }
 }
@@ -66,9 +66,9 @@ extension TweetInitializationError : CustomStringConvertible {
     public var description: String {
         switch self {
         case .empty:
-            return "[TweetInitializationError] Empty tweet."
+            return "[\(type(of: self))] Empty tweet."
         case .tooLong(let tweet, let attachment, let length):
-            return "[TweetInitializationError] Too long tweet: tweet = \(tweet), attachment = \(String(describing: attachment)), length = \(length)"
+            return "[\(type(of: self))] Too long tweet: tweet = \(tweet), attachment = \(String(describing: attachment)), length = \(length)"
         }
     }
 }

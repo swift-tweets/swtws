@@ -132,7 +132,7 @@ swtws resolve-gist --image-output output/directory/path path/to/tweets.tw > path
 
 ### Upload images to Twitter
 
-`stwts resolve-image` コマンドを使って tw ファイルに記述された画像を事前に Twitter にアップロードすることができます。 Twitter にアップロードするには `--twitter` オプションで [Consumer Key, Consumer Secret, Access Token, Access Token Secret](https://dev.twitter.com/oauth/overview/single-user) を `,` 区切りで指定する必要があります。下記の例ではそれぞれ `WWWWWWWWWWWWWWWWWWWW`, `XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`, `YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY`, `ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ` に当たります。
+`swtws resolve-image` コマンドを使って tw ファイルに記述された画像を事前に Twitter にアップロードすることができます。 Twitter にアップロードするには `--twitter` オプションで [Consumer Key, Consumer Secret, Access Token, Access Token Secret](https://dev.twitter.com/oauth/overview/single-user) を `,` 区切りで指定する必要があります。下記の例ではそれぞれ `WWWWWWWWWWWWWWWWWWWW`, `XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX`, `YYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYYY`, `ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ` に当たります。
 
 tw ファイル中のコードをリンクと画像に置き換えた結果が標準出力に書き出されるので、 `> path/to/output.tw` のようにして結果を保存して下さい。
 

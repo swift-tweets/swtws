@@ -41,15 +41,15 @@ swtws check --count sample.tw
 実際に Twitter に投稿するには `swtws presentation` を実行します。
 
 ```bash
-swtws presentation sample.tw
+swtws presentation sample.tw --twitter ... sample.tw
 ```
 
-ただし、 Twitter や Gist に投稿するためにトークンを指定する必要があります。 Twitter については `--twitter` オプションを、 Gist (GitHub) については `--github` オプションを使います。これらのオプションを使ってトークンを指定する方法の詳細は [How to upload resources in advance](#how-to-upload-resources-in-advance) を御覧下さい。
+なお、少なくとも `--twitter` の指定が必要です。このオプションの指定方法は、「[Upload images to Twitter](#upload-images-to-twitter)」を参照してください。また、Twitter への投稿と同時に Gist への投稿と画像化を済ませるならば、`--github` の指定も必要です（ただし、[事前にリソースをアップロードしておくことを推奨します](#how-to-upload-resources-in-advance)）。これらのオプションを使ってトークンを指定する方法の詳細は [How to upload resources in advance](#how-to-upload-resources-in-advance) を御覧下さい。
 
 デフォルトでは 30 秒間隔でツイートされますが、 `--interval` オプションを使って間隔を変更することもできます。たとえば、 15 秒間隔にするには次のように指定します。
 
 ```bash
-swtws presentation --interval 15.0 sample.tw
+swtws presentation --interval 15.0 --twitter ... sample.tw
 ```
 
 ## How to update
